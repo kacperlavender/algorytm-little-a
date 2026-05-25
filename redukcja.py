@@ -17,6 +17,5 @@ def redukcja(macierz):
         for i in range(len(macierz)):
             macierz[i][j] -= min_kol
 
-    return suma_redukcji
-
+    return macierz, suma_redukcji
 
