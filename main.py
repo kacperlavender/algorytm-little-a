@@ -69,9 +69,11 @@ def little(macierz_wejsciowa):
         lb, _, macierz, akt_w, akt_k, wybrane = heapq.heappop(kolejka)
 
         if czyKZ2(lb, najlepszy_koszt):
+            print(f"KZ2 -> odcięcie gałęzi: LB={lb} >= v*={najlepszy_koszt}")
             continue
 
         if czyKZ1(macierz):
+            print("KZ1 -> odcięcie gałęzi: wiersz lub kolumna zawiera wyłącznie INF")
             continue
         # kompletna trasa
         if czyKZ3(wybrane, n):
@@ -113,7 +115,8 @@ def little(macierz_wejsciowa):
                         wybrane + [(i_star, j_star)],
                     ),
                 )
-
+        else:
+            print("KZ2 Tworzy podcykl")
         # P− – zabroń łuk
         m_minus, wynik = zabronienie(macierz, idx_i, idx_j)
         red = wynik[1] if isinstance(wynik, tuple) else wynik
@@ -128,6 +131,14 @@ def little(macierz_wejsciowa):
 
 
 if __name__ == "__main__":
+    m = [
+        [float("inf"), 2, 3, 4, 5, 6],
+        [6, float("inf"), 4, 3, 2, 1],
+        [1, 3, float("inf"), 7, 9, 1],
+        [2, 3, 5, float("inf"), 9, 2],
+        [1, 1, 2, 6, float("inf"), 1],
+        [6, 2, 8, 5, 3, float("inf")],
+    ]
     print("=== Algorytm Little'a ===\n")
     print_as_matrix(m)
     print()
