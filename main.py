@@ -69,11 +69,9 @@ def little(macierz_wejsciowa):
         lb, _, macierz, akt_w, akt_k, wybrane = heapq.heappop(kolejka)
 
         if czyKZ2(lb, najlepszy_koszt):
-            print("KZ2 - odciecie przez ograniczenie")
             continue
 
         if czyKZ1(macierz):
-            print("KZ1 - podproblem niedopuszczalny")
             continue
         # kompletna trasa
         if czyKZ3(wybrane, n):
