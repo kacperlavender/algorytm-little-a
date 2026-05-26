@@ -1,10 +1,13 @@
+import heapq
 from copy import deepcopy
+
+from krok4 import czyKZ1, czyKZ2, czyKZ3
 from m import m, print_as_matrix
+from pp2 import zabronienie
+from pp_first import podzial_P_na_PP
 from redukcja import redukcja
 from wycznaczanie import krok_2
-from pp_first import podzial_P_na_PP
-from pp2 import zabronienie
-import heapq
+
 
 def zbuduj_trase(luki, n):
     nast = {a: b for a, b in luki}
@@ -44,11 +47,10 @@ def usun_wiersz_kolumne(macierz, akt_w, akt_k, i_star, j_star):
     jj = akt_k.index(j_star)
     nowa = [
         [macierz[i][j] for j in range(len(akt_k)) if j != jj]
-        for i in range(len(akt_w)) if i != ii
+        for i in range(len(akt_w))
+        if i != ii
     ]
     return nowa, [r for r in akt_w if r != i_star], [c for c in akt_k if c != j_star]
-
-
 
 
 def little(macierz_wejsciowa):
@@ -59,24 +61,31 @@ def little(macierz_wejsciowa):
     print_as_matrix(m0)
     print(f"LB startowe = {lb0}\n")
 
-    najlepsza_luki, najlepszy_koszt = None, float('inf')
+    najlepsza_luki, najlepszy_koszt = None, float("inf")
     licznik = 0
     kolejka = [(lb0, licznik, m0, list(range(n)), list(range(n)), [])]
 
     while kolejka:
         lb, _, macierz, akt_w, akt_k, wybrane = heapq.heappop(kolejka)
 
-        if lb >= najlepszy_koszt:
+        if czyKZ2(lb, najlepszy_koszt):
+            print("KZ2 - odciecie przez ograniczenie")
             continue
 
+        if czyKZ1(macierz):
+            print("KZ1 - podproblem niedopuszczalny")
+            continue
         # kompletna trasa
-        if len(wybrane) == n - 1:
+        if czyKZ3(wybrane, n):
             wszystkie = wybrane + [(akt_w[0], akt_k[0])]
             koszt = koszt_z_lukow(wszystkie, macierz_wejsciowa)
+
             if koszt < najlepszy_koszt:
                 najlepszy_koszt = koszt
                 najlepsza_luki = wszystkie
-                print(f"Nowa najlepsza trasa (koszt={koszt}): {zbuduj_trase(wszystkie, n)}")
+                print(
+                    f"Nowa najlepsza trasa (koszt={koszt}): {zbuduj_trase(wszystkie, n)}"
+                )
             continue
 
         idx_i, idx_j = krok_2(macierz)
@@ -86,15 +95,26 @@ def little(macierz_wejsciowa):
         # P+ – włącz łuk
         if not tworzy_podcykl(wybrane, (i_star, j_star), n):
             m_plus, _ = podzial_P_na_PP(macierz, idx_i, idx_j, wybrane_luki=[])
-            m_plus, nowe_w, nowe_k = usun_wiersz_kolumne(m_plus, akt_w, akt_k, i_star, j_star)
+            m_plus, nowe_w, nowe_k = usun_wiersz_kolumne(
+                m_plus, akt_w, akt_k, i_star, j_star
+            )
             if j_star in nowe_w and i_star in nowe_k:
-                m_plus[nowe_w.index(j_star)][nowe_k.index(i_star)] = float('inf')
+                m_plus[nowe_w.index(j_star)][nowe_k.index(i_star)] = float("inf")
             m_plus, red = redukcja(m_plus)
             lb_plus = lb + red
             if lb_plus < najlepszy_koszt:
                 licznik += 1
-                heapq.heappush(kolejka, (lb_plus, licznik, m_plus, nowe_w, nowe_k,
-                                         wybrane + [(i_star, j_star)]))
+                heapq.heappush(
+                    kolejka,
+                    (
+                        lb_plus,
+                        licznik,
+                        m_plus,
+                        nowe_w,
+                        nowe_k,
+                        wybrane + [(i_star, j_star)],
+                    ),
+                )
 
         # P− – zabroń łuk
         m_minus, wynik = zabronienie(macierz, idx_i, idx_j)
@@ -102,10 +122,11 @@ def little(macierz_wejsciowa):
         lb_minus = lb + red
         if lb_minus < najlepszy_koszt:
             licznik += 1
-            heapq.heappush(kolejka, (lb_minus, licznik, m_minus, akt_w[:], akt_k[:], wybrane[:]))
+            heapq.heappush(
+                kolejka, (lb_minus, licznik, m_minus, akt_w[:], akt_k[:], wybrane[:])
+            )
 
     return najlepsza_luki, najlepszy_koszt
-
 
 
 if __name__ == "__main__":
