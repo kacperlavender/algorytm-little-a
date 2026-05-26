@@ -34,9 +34,9 @@ def _zabron_podcyklu(macierz_pp, aktywne_wiersze, aktywne_kolumny, wybrane_luki,
             macierz_pp[i][j] = float('inf')
 
 
-def podzial_P_na_PP(macierz_P, i_gwiazdka, j_gwiazdka, LB_P=0):
-    
-    wybrane_luki = []
+def podzial_P_na_PP(macierz_P, i_gwiazdka, j_gwiazdka, wybrane_luki=None):
+    if wybrane_luki is None:
+        wybrane_luki = []
     aktywne_wiersze = list(range(len(macierz_P)))
     aktywne_kolumny = list(range(len(macierz_P[0])))
 
